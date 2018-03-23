@@ -88,3 +88,28 @@ and sometimes (depending on the project management tool) running an installation
 * maybe you did add the library to the classpath, but that was after you started the REPL: in this case,
 you should re-start the REPL.
 
+== Ending up in a namespace that wasn't properly initialized
+
+**Symptoms:**
+[source,clojure-repl]
+----
+user=> (in-ns 'namespace.tpyo)
+#object[clojure.lang.Namespace 0x6ed3f258 "namespace.tpyo"]
+namespace.tpyo=> (+ 1 1)
+CompilerException java.lang.RuntimeException: Unable to resolve symbol: + in this context, compiling:(NO_SOURCE_PATH:2:1)
+----
+
+**Explanations:** when in-ns creates a new namespace, it doesn't refer clojure.core, so none of the standard functions are visible.
+
+* you can resolve this situation by using `clojure.core/refer-clojure` in its fully qualified form, then finding the namespace you had wanted.
+[source,clojure-repl]
+----
+namespace.tpyo=> (clojure.core/refer-clojure)
+nil
+namespace.tpyo=> (require 'namespace.typo)
+nil
++namespace.tpyo=> (in-ns 'namespace.typo)
+#object[clojure.lang.Namespace 0x65045a87 "namespace.typo"]
++namespace.typo=> (+ 1 1)
+2
+----
